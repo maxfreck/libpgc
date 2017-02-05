@@ -1,0 +1,11 @@
+{
+	"name" : "pgc",
+	"description" : "Proleptic Gregorian calendar.",
+	"authors" : [ "Maxim Freck" ],
+	"license" : "BOOST-1.0",
+
+	"copyright": "Copyright © 2016–2017, Maxim Freck",
+
+	"sourcePaths": ["source/"],
+	"targetType": "library"
+}
