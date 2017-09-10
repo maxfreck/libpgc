@@ -7,8 +7,11 @@
  */
 module pgc.exception;
 
+/// Library exception
 class PgcException : Exception {
-	@safe pure nothrow this(string s, string fn = __FILE__, size_t ln = __LINE__) {
+	/// constructor
+	pure nothrow this(string s, string fn = __FILE__, size_t ln = __LINE__) @safe
+	{
 		super(s, fn, ln);
 	}
 }
