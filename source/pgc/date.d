@@ -263,7 +263,7 @@ pure Date prevDay(Date d) @safe
 
 
 version(Posix) {
-	import core.stdc.time: gtime, time;
+	import core.stdc.time: gmtime, localtime, time;
 
 	/***********************************
 	 * Returns: the current date in UTC
