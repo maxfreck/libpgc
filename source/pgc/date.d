@@ -11,9 +11,11 @@ public import pgc.exception;
 
 alias Date = uint;
 
-enum int YEAR_MASK = 0x7FFFFF; //8_388_607
-enum int MAX_YEAR  = 0x3FFFFF; //4_194_303 – maximum year value is 4_194_303 BCE or 4_194_303 CE
-enum int CE_START  = 0x80000021; //Date value 01.01.01
+private enum int YEAR_MASK = 0x7FFFFF; //8_388_607
+/// 4_194_303 – maximum year value is 4_194_303 BCE or 4_194_303 CE
+enum int MAX_YEAR  = 0x3FFFFF; 
+/// Common era start 01.01.01
+enum int CE_START  = 0x80000021;
 
 ///Date era enum
 enum Era:byte {
@@ -29,7 +31,7 @@ enum Era:byte {
  *  month = the number of the month
  *  year  = the number of the year
  */
-@safe pure Date mkDate(int day, int month, int year)
+pure Date mkDate(int day, int month, int year) @safe
 {
 	assertDate(day, month, year);
 	return ( (day & 0x1F) | ((month & 0x0F) << 5) | (((year+MAX_YEAR)&YEAR_MASK) << 9) );
@@ -43,7 +45,7 @@ enum Era:byte {
  *  month = the number of the month
  *  year  = the number of the year accroding to ISO 8601
  */
-@safe pure Date mkDateISO(int day, int month, int year)
+pure Date mkDateISO(int day, int month, int year) @safe
 {
 	return mkDate(day, month, (year < 1) ? --year : year);
 }
@@ -56,9 +58,9 @@ enum Era:byte {
  *  month = the number of the month
  *  year  = the number of the year
  */
-@safe pure private void assertDate(int day, int month, int year)
+pure private void assertDate(int day, int month, int year) @safe
 {
-	import std.conv;
+	import std.conv: to;
 	if (year < -MAX_YEAR || year == 0 || year > MAX_YEAR) {
 		throw new PgcException("The absolute year value "~to!string(year)~" is out of bounds [1..4 194 303]");
 	}
@@ -83,7 +85,6 @@ enum Era:byte {
  */
 @safe pure nothrow ubyte daysInMonth(int month, int year)
 {
-	import std.stdio;
 	switch (month) {
 		case 4:
 		case 6:
@@ -103,7 +104,7 @@ enum Era:byte {
  * Params:
  *  year  = the number of the year
  */
-@property @safe pure nothrow bool isLeap(int year)
+pure nothrow bool isLeap(int year) @safe @nogc
 {
 	if (year <= 0) year++;
 	if (year%4 != 0) return false;
@@ -119,19 +120,20 @@ enum Era:byte {
  *  d1 = first date
  *  d2 = second date
  */
-@safe pure nothrow uint daysBetween(Date d1, Date d2)
+pure nothrow uint daysBetween(Date d1, Date d2) @safe @nogc
 {
-	import std.algorithm;
+	import std.algorithm: max, min;
 	auto dateMin = min(d1, d2);
 	auto dateMax = max(d1, d2);
 
-	@safe pure nothrow uint g(ubyte d, ubyte m, int y) {
-		m = (m + 9) % 12;
-		y = y - m/10;
-		return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
-	}
-
 	return g(dateMax.day, dateMax.month, dateMax.isoYear) - g(dateMin.day, dateMin.month, dateMin.isoYear);
+}
+
+private pure nothrow uint g(ubyte d, ubyte m, int y) @safe @nogc
+{
+	m = (m + 9) % 12;
+	y = y - m/10;
+	return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
 }
 
 /***********************************
@@ -140,9 +142,9 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow ubyte day(Date d)
+pure nothrow ubyte day(Date d) @safe @nogc
 {
-	return cast(ubyte)((d & 0x1F));
+	return cast(ubyte)(d & 0x1F);
 }
 
 /***********************************
@@ -151,7 +153,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow ubyte month(Date d)
+pure nothrow ubyte month(Date d) @safe @nogc
 {
 	return cast(ubyte)((d >> 5) & 0x0F);
 }
@@ -162,7 +164,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow int year(Date d)
+pure nothrow int year(Date d) @safe @nogc
 {
 	return cast(int)( ((d >> 9) & YEAR_MASK) - MAX_YEAR);
 }
@@ -173,7 +175,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow int absYear(Date d)
+pure nothrow int absYear(Date d) @safe @nogc
 {
 	auto year = d.year;
 	return (year < 0) ? -year : year;
@@ -185,7 +187,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow int isoYear(Date d)
+pure nothrow int isoYear(Date d) @safe @nogc
 {
 	auto year = d.year;
 	return (year < 0) ? year+1 : year;
@@ -197,7 +199,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow int holoceneYear(Date d)
+pure nothrow int holoceneYear(Date d) @safe @nogc
 {
 	return 10_000 + d.isoYear;
 }
@@ -208,7 +210,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure nothrow Era era(Date d)
+pure nothrow Era era(Date d) @safe @nogc
 {
 	return (d < CE_START) ? Era.BCE : Era.CE;
 }
@@ -219,7 +221,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure Date nextDay(Date d)
+pure Date nextDay(Date d) @safe
 {
 	int day = d.day;
 	int month = d.month;
@@ -241,7 +243,7 @@ enum Era:byte {
  * Params:
  *  d = date
  */
-@property @safe pure Date prevDay(Date d)
+pure Date prevDay(Date d) @safe
 {
 	int day = d.day;
 	int month = d.month;
@@ -261,7 +263,7 @@ enum Era:byte {
 
 
 version(Posix) {
-	import core.stdc.time;
+	import core.stdc.time: gmtime, localtime, time;
 
 	/***********************************
 	 * Returns: the current date in UTC
@@ -285,7 +287,7 @@ version(Posix) {
 }
 
 version(Windows) {
-	import core.sys.windows.windows;
+	import core.sys.windows.windows: GetSystemTime, SYSTEMTIME;
 
 	/***********************************
 	 * Returns: the current date in UTC
@@ -309,7 +311,7 @@ version(Windows) {
 }
 
 
-unittest
+@safe unittest
 {
 	void assertLeap()
 	{
@@ -323,7 +325,7 @@ unittest
 
 	void assertCreation()
 	{
-		auto platonBirth = mkDate(10,11,-427);
+		immutable platonBirth = mkDate(10,11,-427);
 
 		assert(platonBirth.day == 10);
 		assert(platonBirth.month == 11);
@@ -346,14 +348,14 @@ unittest
 
 	void assertIteration()
 	{
-		auto date = mkDate(31,12,-1);
-		auto next = date.nextDay;
+		immutable date = mkDate(31,12,-1);
+		immutable next = date.nextDay;
 
 		assert(next.day == 1);
 		assert(next.month == 1);
 		assert(next.year == 1);
 
-		auto prev = next.prevDay;
+		immutable prev = next.prevDay;
 		assert(prev == date);
 	}
 

@@ -20,7 +20,7 @@ alias Time = uint;
  *  second = the number of the second
  *  split  = the number of the split (1/32767 of a second)
  */
-@safe pure Time mkTime(int hour, int minute, int second, int split = 0)
+pure Time mkTime(int hour, int minute, int second, int split = 0) @safe
 {
 	assertTime(hour, minute, second, split);
 	return (((hour & 0x1F) << 27) | ((minute & 0x3F) << 21) | ((second & 0x3F) << 15) | (split & 0x3FFF));
@@ -34,13 +34,13 @@ alias Time = uint;
  *  month = the number of the month
  *  year  = the number of the year
  */
-@safe pure private void assertTime(int hour, int minute, int second, int split = 0)
+pure private void assertTime(int hour, int minute, int second, int split = 0) @safe
 {
-	import std.conv;
+	import std.conv: to;
 	if (hour < 0 || hour > 23) throw new PgcException("Invalid hour value: "~to!string(hour));
 	if (minute < 0 || minute > 59) throw new PgcException("Invalid minute value: "~to!string(minute));
 	if (second < 0 || second > 59) throw new PgcException("Invalid second value: "~to!string(second));
-	if (split < 0 || split > 32768) throw new PgcException("Split "~to!string(split)~" is out of bound [0..32768]");
+	if (split < 0 || split > 32_768) throw new PgcException("Split "~to!string(split)~" is out of bound [0..32768]");
 }
 
 /***********************************
@@ -49,7 +49,7 @@ alias Time = uint;
  * Params:
  *  t = time
  */
-@property ubyte hour(Time t)
+pure nothrow ubyte hour(Time t) @safe @nogc
 {
 	return cast(ubyte)((t >> 27) & 0x1F);
 }
@@ -60,7 +60,7 @@ alias Time = uint;
  * Params:
  *  t = time
  */
-@property ubyte minute(Time t)
+pure nothrow ubyte minute(Time t) @safe @nogc
 {
 	return cast(ubyte)((t >> 21) & 0x3F);
 }
@@ -71,7 +71,7 @@ alias Time = uint;
  * Params:
  *  t = time
  */
-@property ubyte second(Time t)
+pure nothrow ubyte second(Time t) @safe @nogc
 {
 	return cast(ubyte)((t >> 15) & 0x3F);
 }
@@ -82,13 +82,13 @@ alias Time = uint;
  * Params:
  *  t = time
  */
-@property ushort split(Time t)
+pure nothrow ushort split(Time t) @safe @nogc
 {
 	return cast(ushort)(t & 0x7FFF);
 }
 
 version(Posix) {
-	import core.sys.posix.sys.time;
+	import core.sys.posix.sys.time: gettimeofday, gmtime, localtime, timeval;
 
 	/***********************************
 	 * Returns: the current time in UTC
@@ -116,7 +116,7 @@ version(Posix) {
 }
 
 version(Windows) {
-	import core.sys.windows.windows;
+	import core.sys.windows.windows: GetLocalTime, GetSystemTime, SYSTEMTIME;
 
 	/***********************************
 	 * Returns: the current time in UTC

@@ -7,8 +7,8 @@
  */
 module pgc.timestamp;
 
-public import pgc.exception;
 public import pgc.date;
+public import pgc.exception;
 public import pgc.time;
 
 alias Timestamp = ulong;
@@ -22,7 +22,7 @@ alias Timestamp = ulong;
  *
  * See_Also: `pgc.date.mkDate`, `pgc.time.mkTime`
  */
-Timestamp mkTimestamp(Date date, Time time)
+pure nothrow Timestamp mkTimestamp(Date date, Time time) @safe @nogc
 {
 	return ( (cast(ulong)(date) << 32) | time );
 }
@@ -33,7 +33,7 @@ Timestamp mkTimestamp(Date date, Time time)
  * Params:
  *  stamp = timestamp
  */
-@property Date date(Timestamp stamp)
+pure nothrow Date date(Timestamp stamp) @safe @nogc
 {
 	return cast(Date)(stamp >> 32);
 }
@@ -44,13 +44,13 @@ Timestamp mkTimestamp(Date date, Time time)
  * Params:
  *  stamp = timestamp
  */
-@property Time time(Timestamp stamp)
+pure nothrow Time time(Timestamp stamp) @safe @nogc
 {
 	return cast(Time)(stamp);
 }
 
 version(Posix) {
-	import core.sys.posix.sys.time;
+	import core.sys.posix.sys.time: gettimeofday, gmtime, localtime, timeval;
 
 	/***********************************
 	 * Returns: the current timestamp in UTC
@@ -82,7 +82,7 @@ version(Posix) {
 }
 
 version(Windows) {
-	import core.sys.windows.windows;
+	import core.sys.windows.windows: GetLocalTime, GetSystemTime, SYSTEMTIME;
 
 	/***********************************
 	 * Returns: the current timestamp in UTC

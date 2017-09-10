@@ -25,41 +25,48 @@ struct DateRange {
 
 	@disable private this();
 
-	this(Date start, Date end)
+	/// Constructor
+	this(Date start, Date end) @safe
 	{
-		import std.algorithm;
+		import std.algorithm: max, min;
 		this.frontDate = min(start, end);
 		this.endDate = max(start, end).nextDay;
 	}
 
-	this(int month, int year)
+	/// ditto
+	this(int month, int year) @safe
 	{
 		this.frontDate = mkDate(1, month, year);
 		this.endDate = mkDate(daysInMonth(month, year), month, year).nextDay;
 	}
 
-	this(int year)
+	/// ditto
+	this(int year) @safe
 	{
 		this.frontDate = mkDate(1, 1, year);
 		this.endDate = mkDateISO(1, 1, ++year);
 	}
 
-	@property @safe pure nothrow bool empty() const
+	/// for Range access
+	pure nothrow bool empty() const @safe
 	{
 		return this.frontDate == this.endDate;
 	}
 
-	@property @safe pure nothrow auto front()
+	/// ditto
+	pure nothrow auto front() @safe
 	{
 		return this.frontDate;
 	}
 
-	@safe pure void popFront()
+	/// ditto
+	pure void popFront() @safe
 	{
 		if (this.frontDate < this.endDate) this.frontDate = this.frontDate.nextDay;
 	}
 
-	@property auto save() const
+	/// ditto
+	auto save() const @safe
 	{
 		return this;
 	}
@@ -75,7 +82,7 @@ struct DateRange {
 
 
 ///
-unittest
+@safe unittest
 {
 	auto Feb2016 = DateRange(2,2016);
 
