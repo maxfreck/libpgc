@@ -287,7 +287,7 @@ version(Posix) {
 }
 
 version(Windows) {
-	import core.sys.windows.windows: GetSystemTime, SYSTEMTIME;
+	import core.sys.windows.windows: GetLocalTime, GetSystemTime, SYSTEMTIME;
 
 	/***********************************
 	 * Returns: the current date in UTC
